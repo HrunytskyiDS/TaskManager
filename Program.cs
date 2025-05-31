@@ -1,5 +1,6 @@
 using FluentMigrator.Runner;
 using LazyCache;
+using TaskManager;
 using TaskManager.Endpoints;
 using TaskManager.Services;
 
@@ -22,6 +23,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IAppCache, CachingService>();
 builder.Services.AddSingleton<TaskService>();
+builder.Services.AddSingleton<DatabaseInitializer>();
 
 var app = builder.Build();
 
@@ -30,6 +32,9 @@ using (var scope = app.Services.CreateScope())
 {
     var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
     runner.MigrateUp();
+
+    var initializer = scope.ServiceProvider.GetRequiredService<DatabaseInitializer>(); 
+    initializer.Execute();
 }
 
 // Configure the HTTP request pipeline.
